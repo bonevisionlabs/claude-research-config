@@ -188,6 +188,68 @@ paper_path = compile_paper(paper_id=1)
 # Output: Times New Roman, 12pt, double-spaced, IMRAD ordered
 ```
 
+## Self-Learning Feedback Loop
+
+The workflow includes a built-in review-learn-improve cycle powered by
+`research-agent`'s feedback module. After writing each section:
+
+### Review → Learn → Improve
+
+```python
+from research_agent.feedback import FeedbackLoop, create_review, create_lesson, build_review_checklist
+from research_agent.workflow import Workflow
+
+loop = FeedbackLoop(state_dir=Path("state/feedback"))
+wf = Workflow.load("state/workflow.json")
+
+# 1. Build a section-specific checklist
+checklist = build_review_checklist("methods")
+
+# 2. Review the output (Claude Code scores each criterion 0.0–1.0)
+review = create_review(
+    task_id="write_methods", iteration=0,
+    scores={"methodology": 0.9, "writing_quality": 0.7, "completeness": 0.8},
+)
+review.strengths = ["Clear protocol description"]
+review.weaknesses = ["Missing reproducibility details"]
+review.suggestions = ["Add software versions and hyperparameters"]
+loop.record_review(review)
+wf.set_feedback("write_methods", review.to_dict())
+
+# 3. Extract reusable lessons
+lesson = create_lesson(
+    source_task="write_methods",
+    category="methodology",
+    pattern="Methods section missing software/library versions",
+    correction="Always list exact versions (e.g., PyTorch 2.1, nnU-Net v2)",
+)
+loop.record_lesson(lesson)
+
+# 4. Retry if below threshold
+if loop.should_retry("write_methods"):
+    wf.retry_task("write_methods")  # resets to pending, increments iteration
+
+# 5. Before starting any task, get accumulated guidance
+guidance = loop.get_task_guidance("write_results", agent="writer")
+
+loop.save()
+wf.save("state/workflow.json")
+```
+
+### Workflow DAG with Reviews
+
+```
+write_intro → review_intro ─┐
+write_methods → review_methods ─┤
+write_results → review_results ─┤
+write_discussion → review_discussion ─┤
+                                      ↓
+                              compile_draft → review_draft → apply_learnings
+```
+
+Sections are reviewed before compilation, ensuring quality at each stage.
+Lessons persist across sessions and are surfaced as guidance on future tasks.
+
 ## Quality Checklist
 
 Before submitting any paper, verify:

@@ -81,15 +81,32 @@ Claude Code:
   → Saves to state/paper1_*/drafts/
 ```
 
-### 6. Review and Iterate
+### 6. Review with Self-Learning Feedback Loop
 
 ```
-You: "Review the Results section against the quality checklist."
+You: "Review the Methods section and record what you learn."
 
 Claude Code:
-  → Reads the quality checklist from CLAUDE.md
-  → Checks: all claims backed by data? stats complete? figures referenced?
-  → Reports gaps and suggests fixes
+  → Builds section-specific checklist via build_review_checklist("methods")
+  → Scores each criterion (methodology, writing_quality, completeness, etc.)
+  → Records a ReviewResult with strengths, weaknesses, and suggestions
+  → Extracts reusable Lessons (anti-patterns and corrections)
+  → If score < threshold: retries the task with accumulated guidance
+  → Lessons persist to state/feedback/ and inform all future tasks
+```
+
+The feedback loop means quality improves **across** sessions, not just within
+a single review cycle. Before starting any task, Claude Code checks
+`feedback_loop.get_task_guidance()` for relevant lessons from past iterations.
+
+```
+You: "What has the feedback loop learned so far?"
+
+Claude Code:
+  → loop.learning_summary()
+  → Shows lessons by category, confidence scores, and top insights
+  → loop.iteration_summary()
+  → Shows per-task review progress and retry counts
 ```
 
 ### 7. Literature Search
