@@ -46,7 +46,7 @@ Install via the Claude Code marketplace, or follow the instructions in the
 
 ```bash
 # Download the template
-curl -o CLAUDE.md https://raw.githubusercontent.com/bonevisionlabs/claude-research-setup/main/CLAUDE.md
+curl -o CLAUDE.md https://raw.githubusercontent.com/bonevisionlabs/claude-research-config/main/CLAUDE.md
 ```
 
 Or copy it manually from this repository into your project root.

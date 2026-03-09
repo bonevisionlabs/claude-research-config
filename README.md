@@ -1,4 +1,4 @@
-# Claude Research Setup
+# Claude Research Config
 
 **Turn Claude Code into a PhD-level research assistant — in 5 minutes.**
 
@@ -74,11 +74,11 @@ pip install research-agent
 
 ```bash
 # Option A: Clone this repo and copy
-git clone https://github.com/bonevisionlabs/claude-research-setup.git
-cp claude-research-setup/CLAUDE.md /path/to/your/project/
+git clone https://github.com/bonevisionlabs/claude-research-config.git
+cp claude-research-config/CLAUDE.md /path/to/your/project/
 
 # Option B: Download just the file
-curl -o CLAUDE.md https://raw.githubusercontent.com/bonevisionlabs/claude-research-setup/main/CLAUDE.md
+curl -o CLAUDE.md https://raw.githubusercontent.com/bonevisionlabs/claude-research-config/main/CLAUDE.md
 ```
 
 ### 3. Customize for your project
@@ -93,7 +93,7 @@ Open `CLAUDE.md` and fill in:
 
 ```bash
 # Copy optimized settings (back up your existing settings first)
-cp claude-research-setup/templates/settings-template.json ~/.claude/settings.json
+cp claude-research-config/templates/settings-template.json ~/.claude/settings.json
 ```
 
 ### 5. Start working
