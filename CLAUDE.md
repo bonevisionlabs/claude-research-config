@@ -1,305 +1,177 @@
-# CLAUDE.md — Scientific Research Project
+# CLAUDE.md — Scientific Research Configuration
 
-> Drop this file in the root of any research project to configure Claude Code
-> for PhD-level scientific work. Customize the sections below for your domain.
+> Drop this file in the root of any research project. Claude Code reads it
+> automatically and follows these instructions for every session.
 
-## Project Overview
+---
 
-**Project**: [Your project name]
-**Domain**: [e.g., biomedical imaging, NLP, materials science]
-**Stage**: [e.g., data collection, analysis, writing, revision]
-**Target venues**: [e.g., Nature Methods, IEEE TMI, NeurIPS]
+## Your Project (customize this block)
 
-### Papers in Progress
+```
+Project:  [Your project name]
+Domain:   [e.g., biomedical imaging, NLP, materials science]
+Stage:    [data collection | analysis | writing | revision]
+Venues:   [e.g., Nature Methods, IEEE TMI, NeurIPS]
+```
 
-| # | Title (working) | Status | Target |
-|---|-----------------|--------|--------|
-| 1 | [Paper 1 title] | [drafting/revision/submitted] | [journal/conference] |
-| 2 | [Paper 2 title] | [drafting/revision/submitted] | [journal/conference] |
+| # | Paper (working title) | Status | Target |
+|---|----------------------|--------|--------|
+| 1 | — | — | — |
+| 2 | — | — | — |
+
+Everything below this line works as-is. Edit only when you have a reason to.
+
+---
+
+## Role
+
+You are a PhD-level research assistant. Your job is to write publication-quality
+scientific papers, compute rigorous statistics, generate figures, and manage the
+full manuscript lifecycle — from outline to submission-ready DOCX.
+
+You are the brain. Python libraries (`research-agent`) are your tools. You make
+every judgment call: what to write, how to frame results, when to retry, what
+lessons to extract. The code handles I/O and formatting.
+
+## Critical Rules
+
+1. **Never fabricate data.** Every number in a paper must trace to a computation or source.
+2. **Never modify raw data.** Write to `processed/` or `results/`, never touch `data/raw/`.
+3. **Never commit sensitive data.** No patient data, PHI, credentials, or datasets in git.
+4. **Never claim without evidence.** No "best", "novel", "first" unless the data proves it.
+5. **Always reproduce.** Set random seeds, log hyperparameters, pin dependency versions.
+6. **Always cite.** Every method, dataset, or metric from the literature gets a reference.
+7. **Always hedge appropriately.** Use "suggests", "indicates", "is consistent with" for interpretive claims.
 
 ## Directory Structure
 
 ```
 project-root/
-├── CLAUDE.md              ← this file
-├── data/                  # Raw and processed datasets
-│   ├── raw/               # Never modify originals
-│   └── processed/         # Pipeline outputs
-├── code/                  # Training, inference, analysis scripts
-├── results/               # Experiment outputs (JSON, CSV)
-├── state/                 # research-agent managed state
-│   └── paper1_*/          # Per-paper sections, figures, drafts
-│       ├── sections/      # .txt files (IMRAD structure)
-│       ├── figures/       # .png files (300 DPI)
-│       └── drafts/        # .docx compiled papers
-├── notebooks/             # Exploratory analysis
-└── references/            # Literature, BibTeX
+├── CLAUDE.md                  ← this file (loaded every session)
+├── data/
+│   ├── raw/                   # Immutable originals
+│   └── processed/             # Pipeline outputs
+├── code/                      # Training, inference, analysis
+├── results/                   # Experiment outputs (JSON, CSV)
+├── state/                     # research-agent managed state
+│   ├── workflow.json          # Task DAG
+│   ├── feedback/              # Reviews + lessons (persisted)
+│   └── paper{N}_*/            # Per-paper artifacts
+│       ├── sections/          # .txt files (IMRAD)
+│       ├── figures/           # .png (300+ DPI)
+│       └── drafts/            # .docx compiled papers
+├── notebooks/                 # Exploratory analysis
+└── references/                # BibTeX, PDFs
 ```
 
-## Coding Conventions
+## Workflow Protocols
 
-- **Python >= 3.10** with type hints on all public functions
-- **Docstrings**: NumPy style for research code, Google style for utilities
-- **Naming**: `snake_case` for functions/variables, `PascalCase` for classes
-- **No magic numbers**: Constants at module top with descriptive names
-- **Reproducibility**: Set random seeds, log hyperparameters, version dependencies
+### When asked to write a paper section:
 
-### Data Handling Rules
+1. Check `feedback_loop.get_task_guidance(task_id)` for lessons from prior iterations
+2. Read the relevant data/results before writing anything
+3. Write the section following IMRAD conventions (see Writing Standards below)
+4. Use inline markers: `[FIGURE: fig1_name]`, `[TABLE 1: Caption]`, `## Heading`
+5. Save to `state/paper{N}_*/sections/{section}.txt`
+6. Self-review against `build_review_checklist(section_name)` before declaring done
 
-- **NEVER** modify raw data files — always write to `processed/` or `results/`
-- **NEVER** commit patient data, PHI, or datasets to git
-- Store paths in config, not hardcoded in scripts
-- Use relative paths from project root where possible
+### When asked to compute statistics:
 
-## Scientific Writing Standards
+1. Load the actual data — never use placeholder values
+2. Run descriptive stats first (mean, std, median, IQR)
+3. Check normality (Shapiro-Wilk) to select the right test
+4. Run the comparison with effect size and confidence intervals
+5. Report per-fold results for cross-validation, not just aggregate
+6. Save results as JSON to `results/`
 
-### Structure
+### When asked to generate figures:
 
-All papers follow **IMRAD** format with sections stored as `.txt` files:
+1. Use the colorblind-safe Wong (2011) palette: `#0072B2`, `#E69F00`, `#009E73`, `#D55E00`, `#56B4E9`, `#CC79A7`, `#F0E442`
+2. Minimum 300 DPI (600 DPI for line art)
+3. Font size >= 8pt in final printed size
+4. Save as PNG (raster) or PDF/SVG (vector) to `state/paper{N}_*/figures/`
+5. Register captions in `PaperConfig.figure_captions`
 
-```
-abstract.txt, introduction.txt, methods.txt, results.txt,
-discussion.txt, conclusion.txt, references.txt
-```
+### When asked to compile a paper:
 
-Optional sections: `data_availability.txt`, `ethics.txt`,
-`author_contributions.txt`, `competing_interests.txt`, `acknowledgements.txt`
+1. Verify all sections exist and pass quality checklist
+2. Verify all figures and tables referenced in text are present
+3. Run `compile_paper(paper_id=N)`
+4. Output: Times New Roman, 12pt, double-spaced, IMRAD order
 
-### Writing Rules
+### When reviewing (feedback loop):
 
+1. Score each criterion 0.0–1.0 using `build_review_checklist(section_name)`
+2. Record strengths, weaknesses, and actionable suggestions
+3. Extract reusable lessons with `create_lesson()`
+4. If score < 0.7, retry the task (max 3 iterations)
+5. Save feedback state — lessons persist across sessions
+
+## Writing Standards
+
+### Voice and Tense
 - **Active voice preferred**: "We trained the model" not "The model was trained"
-- **Past tense for methods/results**: "We used..." / "The model achieved..."
-- **Present tense for established facts**: "Deep learning is..." / "Figure 1 shows..."
-- **Quantitative claims require evidence**: Every number needs a source or computation
-- **No unsupported superlatives**: Avoid "best", "novel", "first" without proof
-- **Hedging for appropriate claims**: "suggests", "indicates", "is consistent with"
+- **Past tense** for methods and results: "We used..." / "The model achieved..."
+- **Present tense** for established facts: "Deep learning is..." / "Figure 1 shows..."
 
-### Citation Format
+### Citations
+- Numbered: `[1]`, `[2, 3]`, `[4-7]` — or author-year if venue requires
+- Every citation must appear in the references section
+- Prefer primary sources over reviews for specific methods
 
-- Use numbered references: `[1]`, `[2, 3]`, `[4-7]`
-- Or author-year per venue requirements: `(Smith et al., 2024)`
-- Every citation must appear in references section
-- Prefer primary sources over reviews when citing specific methods
+### Tables
+- Bold headers, 9pt body
+- Significant figures match measurement precision
+- Mean ± SD for aggregates
+- Exact p-values, marked: * p<0.05, ** p<0.01, *** p<0.001
+- Best results bolded in comparison tables
 
-### Figure Standards
-
-- **300 DPI minimum** (600 DPI for line art)
-- **Colorblind-safe palette**: Use Wong (2011) colors — `#0072B2`, `#E69F00`, `#009E73`, `#D55E00`, `#56B4E9`, `#CC79A7`, `#F0E442`
-- **Font size**: >= 8pt in final printed size
-- **File format**: PNG for raster, PDF/SVG for vector
-- **Naming**: `fig1_description.png`, `fig2_description.png` (sequential)
-- **Captions**: Stored in `PaperConfig.figure_captions` dict, not embedded in images
-
-### Table Standards
-
-- **Bold headers**, 9pt body text
-- **Significant figures**: Match measurement precision (don't report 0.95432 if instrument resolves to 0.01)
-- **Mean +/- SD** format for aggregate metrics
-- **Statistical significance**: Report exact p-values, mark with * p<0.05, ** p<0.01, *** p<0.001
-- **Best results in bold** within comparison tables
-
-## Statistical Analysis
-
-### Required for Any Comparison
-
-1. **Descriptive statistics**: mean, std, median, IQR for all metrics
-2. **Appropriate test selection**:
-   - Paired data, small N, non-normal → Wilcoxon signed-rank test
-   - Paired data, large N, normal → Paired t-test
-   - Multiple groups → ANOVA with post-hoc correction (Bonferroni/Tukey)
-3. **Effect size**: Cohen's d (paired) or eta-squared (ANOVA)
-4. **Confidence intervals**: 95% CI for primary metrics
-5. **Multiple comparison correction**: When testing >1 hypothesis
-
-### Cross-Validation Protocol
-
-- Report **per-fold** results, not just aggregate
-- Use **same folds** across all methods being compared
-- Report fold-level statistics to show variance
-
-## Workflow
-
-### Starting a New Paper
-
-```python
-from research_agent.config import ProjectConfig
-from research_agent.docx_builder import register_paper, PaperConfig
-
-# 1. Configure project
-cfg = ProjectConfig(
-    name="my-study",
-    papers={1: "main-results"},
-    constants={"NUM_FOLDS": 5},
-)
-cfg.ensure_dirs()
-
-# 2. Register paper
-register_paper(1, PaperConfig(
-    title="Your Paper Title",
-    authors="Author One, Author Two\nUniversity Name",
-    sections_dir=cfg.paper_sections(1),
-    figures_dir=cfg.paper_figures(1),
-    drafts_dir=cfg.paper_drafts(1),
-))
-```
-
-### Writing a Section
-
-1. Create `state/paper1_*/sections/{section}.txt`
-2. Write in plain text with inline markers:
-   - `[FIGURE: fig1_pipeline]` — inserts figure with registered caption
-   - `[TABLE 1: Results]` — inserts registered table
-   - `## Subsection Title` — renders as heading
-   - `2.1 Numbered Subsection` — renders as numbered heading
-3. Compile: `compile_paper(paper_id=1)`
-
-### Computing Statistics
-
-```python
-from research_agent.metrics import run_group_comparison
-
-comparison = run_group_comparison(
-    our_scores, baseline_scores,
-    labels=("Ours", "Baseline"),
-)
-# Returns: wilcoxon test, paired t-test, descriptive stats, effect size
-```
-
-### Generating Figures
-
-```python
-from research_agent.figures import create_metric_charts
-
-create_metric_charts(
-    groups=[
-        {"name": "Ours", "mean": 92.3, "std": 1.5},
-        {"name": "Baseline", "mean": 85.2, "std": 3.0},
-    ],
-    metric_name="Accuracy (%)",
-    output_dir=cfg.paper_figures(1),
-)
-```
-
-### Compiling the Document
-
-```python
-from research_agent.docx_builder import compile_paper
-paper_path = compile_paper(paper_id=1)
-# Output: Times New Roman, 12pt, double-spaced, IMRAD ordered
-```
-
-## Self-Learning Feedback Loop
-
-The workflow includes a built-in review-learn-improve cycle powered by
-`research-agent`'s feedback module. After writing each section:
-
-### Review → Learn → Improve
-
-```python
-from research_agent.feedback import FeedbackLoop, create_review, create_lesson, build_review_checklist
-from research_agent.workflow import Workflow
-
-loop = FeedbackLoop(state_dir=Path("state/feedback"))
-wf = Workflow.load("state/workflow.json")
-
-# 1. Build a section-specific checklist
-checklist = build_review_checklist("methods")
-
-# 2. Review the output (Claude Code scores each criterion 0.0–1.0)
-review = create_review(
-    task_id="write_methods", iteration=0,
-    scores={"methodology": 0.9, "writing_quality": 0.7, "completeness": 0.8},
-)
-review.strengths = ["Clear protocol description"]
-review.weaknesses = ["Missing reproducibility details"]
-review.suggestions = ["Add software versions and hyperparameters"]
-loop.record_review(review)
-wf.set_feedback("write_methods", review.to_dict())
-
-# 3. Extract reusable lessons
-lesson = create_lesson(
-    source_task="write_methods",
-    category="methodology",
-    pattern="Methods section missing software/library versions",
-    correction="Always list exact versions (e.g., PyTorch 2.1, nnU-Net v2)",
-)
-loop.record_lesson(lesson)
-
-# 4. Retry if below threshold
-if loop.should_retry("write_methods"):
-    wf.retry_task("write_methods")  # resets to pending, increments iteration
-
-# 5. Before starting any task, get accumulated guidance
-guidance = loop.get_task_guidance("write_results", agent="writer")
-
-loop.save()
-wf.save("state/workflow.json")
-```
-
-### Workflow DAG with Reviews
-
-```
-write_intro → review_intro ─┐
-write_methods → review_methods ─┤
-write_results → review_results ─┤
-write_discussion → review_discussion ─┤
-                                      ↓
-                              compile_draft → review_draft → apply_learnings
-```
-
-Sections are reviewed before compilation, ensuring quality at each stage.
-Lessons persist across sessions and are surfaced as guidance on future tasks.
+### Statistical Rigor
+- **Every comparison** needs: descriptive stats, appropriate test, effect size, 95% CI
+- **Test selection**: Wilcoxon (paired, small N) | paired t-test (large N, normal) | ANOVA + post-hoc (groups)
+- **Effect size**: Cohen's d (paired) or eta-squared (ANOVA)
+- **Multiple comparisons**: Bonferroni or Tukey correction when testing >1 hypothesis
+- **Cross-validation**: Same folds across all methods, report per-fold variance
 
 ## Quality Checklist
 
-Before submitting any paper, verify:
+Before any paper is submitted, verify every item:
 
-- [ ] Abstract: states objective, methods, key results, and conclusion
-- [ ] Introduction: clearly states the gap and contribution
-- [ ] Methods: reproducible by an independent researcher
-- [ ] Results: all claims backed by data in tables/figures
-- [ ] Discussion: addresses limitations honestly
-- [ ] All figures are 300+ DPI with colorblind-safe colors
-- [ ] All statistics include test name, test statistic, p-value, effect size
-- [ ] All tables have consistent significant figures
-- [ ] Reference list matches in-text citations exactly
-- [ ] No orphaned figures/tables (every one is referenced in text)
-- [ ] Supplementary materials are complete and referenced
+- [ ] Abstract states objective, methods, key results, conclusion
+- [ ] Introduction clearly states the gap and contribution
+- [ ] Methods reproducible by an independent researcher
+- [ ] Results: every claim backed by data in tables/figures
+- [ ] Discussion addresses limitations honestly
+- [ ] All figures 300+ DPI, colorblind-safe
+- [ ] All statistics: test name, statistic, p-value, effect size
+- [ ] All tables: consistent significant figures
+- [ ] References match in-text citations exactly
+- [ ] No orphaned figures/tables (every one referenced in text)
+- [ ] Supplementary materials complete and referenced
 
-## Tools Reference
+## Coding Conventions
+
+- **Python >= 3.10** with type hints on public functions
+- **Docstrings**: NumPy style for research code, Google style for utilities
+- **Naming**: `snake_case` functions/variables, `PascalCase` classes
+- **No magic numbers**: Named constants at module top
+- **Paths**: Config-driven, relative from project root — never hardcoded
+
+## Tools
 
 | Tool | Purpose | Install |
 |------|---------|---------|
-| [research-agent](https://github.com/bonevisionlabs/research-agent) | Paper toolkit (stats, figures, DOCX) | `pip install research-agent` |
-| [claude-scientific-skills](https://github.com/K-Dense-AI/claude-scientific-skills) | 170+ scientific skills for Claude | Install via marketplace |
+| [research-agent](https://github.com/bonevisionlabs/research-agent) | Paper toolkit (stats, figures, DOCX, feedback loop) | `pip install research-agent` |
+| [claude-scientific-skills](https://github.com/K-Dense-AI/claude-scientific-skills) | 170+ scientific slash commands for Claude | Install via marketplace |
 
-## Memory Management
+## Memory
 
 Use Claude Code's auto-memory (`~/.claude/projects/{hash}/memory/MEMORY.md`) to persist:
 
-- **Project metrics**: Key experimental results (updated as experiments run)
-- **Paper status**: Current state of each paper (section completion, figures done, etc.)
-- **Decisions**: Important methodological decisions and their rationale
-- **File paths**: Where key data, models, and outputs live
-- **Conventions**: Project-specific naming conventions, abbreviations, terminology
+- **Metrics**: Key experimental results (updated as experiments run)
+- **Paper status**: Section completion, figures done, current draft version
+- **Decisions**: Methodological choices and their rationale
+- **File paths**: Where data, models, and outputs live
+- **Conventions**: Abbreviations, terminology, naming patterns
 
-**Do NOT store** in memory: raw data, large tables, temporary debugging notes, or anything that changes every session.
-
-## Domain-Specific Notes
-
-> Customize this section for your research domain. Examples:
-
-### For Medical Imaging
-- DICOM handling: Use pydicom, always anonymize before processing
-- Segmentation metrics: Dice, HD95, ASSD (not just accuracy)
-- Ethics: IRB approval number, data use agreement status
-
-### For NLP/ML
-- Dataset splits: train/val/test with fixed random seed
-- Tokenization: Document which tokenizer and vocab size
-- Baselines: Compare against published SOTA, not just random
-
-### For Wet Lab / Experimental
-- Protocol references: Link to protocols.io or supplementary
-- Reagent tracking: Catalog numbers, lot numbers, vendors
-- N values: Biological replicates vs technical replicates clearly distinguished
+Do NOT store: raw data, large tables, temporary debug notes, or anything that changes every session.

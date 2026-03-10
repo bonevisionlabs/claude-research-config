@@ -2,40 +2,33 @@
 
 **Turn Claude Code into a PhD-level research assistant — in 5 minutes.**
 
-A ready-to-use configuration for scientific research with Claude Code. Drop the `CLAUDE.md` into any project and Claude immediately understands how to write papers, compute statistics, generate figures, and compile manuscripts.
+A production-ready configuration for scientific research with Claude Code. Drop the `CLAUDE.md` into any project and Claude immediately knows how to write papers, compute statistics, generate figures, and manage the full manuscript lifecycle.
 
 ## What This Is
 
-A configuration template that transforms Claude Code from a general-purpose coding assistant into a domain-aware scientific research partner. It provides:
+A single `CLAUDE.md` file that transforms Claude Code from a general-purpose assistant into a research partner with:
 
-- **CLAUDE.md** — Project-level instructions that teach Claude Code your research workflow, writing standards, and quality requirements
-- **Settings template** — Optimized Claude Code settings for research work
-- **Memory template** — Structure for persistent project memory across sessions
-- **Workflow guide** — How to use the full stack day-to-day
+- **Behavioral directives** — Claude knows its role, what it must never do, and how to approach every task
+- **Workflow protocols** — Step-by-step procedures for writing sections, computing stats, generating figures, compiling papers, and running the feedback loop
+- **Quality standards** — IMRAD structure, statistical rigor requirements, figure specs, citation rules
+- **A pre-submission checklist** — 11 items verified before any paper ships
 
-## Why This Exists
+Plus optional settings, memory templates, and documentation for day-to-day usage.
 
-Claude Code is powerful out of the box, but it doesn't know your field's conventions, your paper's structure, or your statistical standards — unless you tell it. Most researchers either:
-
-1. Repeat the same instructions every session
-2. Get inconsistent output quality
-3. Don't leverage Claude Code's full capability
-
-This setup solves all three by encoding research best practices into configuration files that persist across sessions.
-
-## The Stack
+## The Architecture
 
 ```
 ┌─────────────────────────────────────────────┐
 │              CLAUDE.md (This Repo)           │
-│  Project instructions, writing standards,    │
-│  quality checklists, workflow definitions     │
+│  Behavioral rules, workflow protocols,      │
+│  quality standards, guardrails              │
 └──────────────────┬──────────────────────────┘
                    │ configures
                    ▼
 ┌─────────────────────────────────────────────┐
 │           Claude Code (The Brain)            │
-│  Makes decisions, writes prose, orchestrates │
+│  Makes all decisions — writes, reviews,     │
+│  learns from feedback, orchestrates          │
 └──────────┬──────────────────┬───────────────┘
            │                  │
      imports & calls    reads skill docs
@@ -44,18 +37,18 @@ This setup solves all three by encoding research best practices into configurati
 │  research-agent  │ │ claude-scientific-     │
 │  (Python Tools)  │ │ skills (170+ Skills)  │
 │                  │ │                       │
-│  figures.py      │ │ literature-review     │
-│  metrics.py      │ │ statistical-analysis  │
+│  metrics.py      │ │ literature-review     │
+│  figures.py      │ │ statistical-analysis  │
 │  docx_builder.py │ │ scientific-writing    │
 │  workflow.py     │ │ pytorch-lightning     │
-│                  │ │ ... and 166 more      │
+│  feedback.py     │ │ ... and 166 more      │
 └──────────────────┘ └───────────────────────┘
 ```
 
 | Component | Purpose | Source |
 |-----------|---------|--------|
-| **CLAUDE.md** | Project configuration & standards | This repo |
-| **research-agent** | Paper toolkit (stats, figures, DOCX) | [bonevisionlabs/research-agent](https://github.com/bonevisionlabs/research-agent) |
+| **CLAUDE.md** | Behavioral config & research standards | This repo |
+| **research-agent** | Paper toolkit (stats, figures, DOCX, feedback loop) | [bonevisionlabs/research-agent](https://github.com/bonevisionlabs/research-agent) |
 | **claude-scientific-skills** | 170+ domain skills for Claude Code | [K-Dense-AI/claude-scientific-skills](https://github.com/K-Dense-AI/claude-scientific-skills) |
 
 ## Quick Start
@@ -63,73 +56,58 @@ This setup solves all three by encoding research best practices into configurati
 ### 1. Install the tools
 
 ```bash
-# Python toolkit for paper compilation
 pip install research-agent
-
-# Scientific skills (install via Claude Code marketplace or clone)
-# See: https://github.com/K-Dense-AI/claude-scientific-skills
 ```
 
-### 2. Copy the CLAUDE.md
+### 2. Add the CLAUDE.md to your project
 
 ```bash
-# Option A: Clone this repo and copy
-git clone https://github.com/bonevisionlabs/claude-research-config.git
-cp claude-research-config/CLAUDE.md /path/to/your/project/
-
-# Option B: Download just the file
 curl -o CLAUDE.md https://raw.githubusercontent.com/bonevisionlabs/claude-research-config/main/CLAUDE.md
 ```
 
-### 3. Customize for your project
+### 3. Customize the top block
 
-Open `CLAUDE.md` and fill in:
-
-- **Project Overview**: Your project name, domain, target venues
-- **Papers in Progress**: Current manuscripts and their status
-- **Domain-Specific Notes**: Conventions for your field
-
-### 4. Apply the settings (optional)
-
-```bash
-# Copy optimized settings (back up your existing settings first)
-cp claude-research-config/templates/settings-template.json ~/.claude/settings.json
-```
-
-### 5. Start working
+Open `CLAUDE.md` and fill in the 5-line project block at the top:
 
 ```
-You: "Set up a new paper project for my cell migration study with 10 bootstraps"
+Project:  Cell Migration Dynamics
+Domain:   Biomedical Imaging
+Stage:    writing
+Venues:   Nature Methods, IEEE TMI
+```
+
+Everything below that line works as-is.
+
+### 4. Start working
+
+```
+You: "Set up a new paper project for my cell migration study with 5-fold CV"
 
 Claude Code:
-  → Reads CLAUDE.md, understands your standards
-  → from research_agent.config import ProjectConfig
+  → Reads CLAUDE.md, understands your standards and workflow
   → Creates project structure, registers paper
   → Ready to write, compute stats, generate figures
 ```
 
-## What the CLAUDE.md Does
+## What the CLAUDE.md Covers
 
-When Claude Code starts a session in your project, it reads `CLAUDE.md` and learns:
+| Section | What It Does |
+|---------|-------------|
+| **Role** | Defines Claude as a PhD-level research assistant with clear responsibilities |
+| **Critical Rules** | 7 non-negotiable guardrails (no fabrication, no raw data modification, etc.) |
+| **Directory Structure** | Where to find and save every type of file |
+| **Workflow Protocols** | Step-by-step procedures for writing, stats, figures, compilation, and review |
+| **Writing Standards** | Voice, tense, citations, hedging rules |
+| **Statistical Rigor** | Test selection, effect sizes, confidence intervals, multiple comparison correction |
+| **Quality Checklist** | 11-item pre-submission verification |
+| **Coding Conventions** | Python style, naming, path handling |
+| **Tools & Memory** | How to use research-agent and persist project state |
 
-| Section | What Claude Learns |
-|---------|-------------------|
-| **Project Overview** | What you're working on, what stage you're at |
-| **Directory Structure** | Where to find and save files |
-| **Coding Conventions** | Your style preferences, Python standards |
-| **Writing Standards** | IMRAD structure, voice, tense, citation format |
-| **Figure Standards** | 300 DPI, colorblind palette, naming conventions |
-| **Table Standards** | Formatting, significant figures, bold conventions |
-| **Statistical Analysis** | Which tests to use, what to report |
-| **Workflow** | How to use research-agent for each task |
-| **Quality Checklist** | What to verify before submission |
-| **Memory Management** | What to persist across sessions |
-
-## Templates
+## Files
 
 | File | Purpose |
 |------|---------|
-| [CLAUDE.md](CLAUDE.md) | Drop-in project configuration |
+| [CLAUDE.md](CLAUDE.md) | Drop-in research configuration |
 | [templates/settings-template.json](templates/settings-template.json) | Optimized Claude Code settings |
 | [templates/MEMORY-TEMPLATE.md](templates/MEMORY-TEMPLATE.md) | Project memory structure |
 | [docs/installation.md](docs/installation.md) | Detailed setup guide |
@@ -137,43 +115,35 @@ When Claude Code starts a session in your project, it reads `CLAUDE.md` and lear
 
 ## Customization
 
-The CLAUDE.md is designed to be forked and customized. Common modifications:
+The CLAUDE.md is designed to work out of the box. Common modifications:
 
-### Change the citation style
-Replace the numbered reference format with author-year (APA) or any other style required by your target venue.
-
-### Add domain-specific sections
-The "Domain-Specific Notes" section at the bottom is a blank canvas. Add your field's conventions, required metrics, reporting standards, etc.
-
-### Extend the quality checklist
-Add venue-specific requirements (e.g., CONSORT for clinical trials, PRISMA for systematic reviews).
-
-### Adjust statistical defaults
-Change the default significance level, preferred tests, or effect size measures for your field.
+- **Citation style** — Switch numbered `[1]` to author-year `(Smith et al., 2024)` for your venue
+- **Domain conventions** — Add field-specific metrics, protocols, or reporting standards
+- **Quality checklist** — Extend with venue requirements (CONSORT, PRISMA, STROBE, etc.)
+- **Statistical defaults** — Change significance level, preferred tests, or effect size measures
+- **Directory structure** — Adjust paths to match your existing project layout
 
 ## Philosophy
 
-This setup follows the **"Claude Code as Brain"** architecture:
+**"Claude Code as Brain"** — one orchestrator, zero multi-agent overhead:
 
-- **One orchestrator** (Claude Code) makes all decisions
-- **Pure Python tools** (research-agent) do computation — zero API calls, zero token overhead
-- **State on disk** (JSON, text files, DOCX) — resumable, inspectable, version-controllable
-- **Configuration as code** (CLAUDE.md) — reproducible, shareable, forkable
-
-No multi-agent frameworks. No token-burning coordination layers. Just a well-configured LLM with the right tools.
+- Claude Code makes all decisions (what to write, how to frame results, when to retry)
+- Python tools (`research-agent`) handle I/O and formatting — zero API calls, zero token cost
+- State lives on disk (JSON, text, DOCX) — resumable, inspectable, version-controllable
+- Configuration as code (`CLAUDE.md`) — reproducible, shareable, forkable
 
 ## Origin
 
-Born from a real PhD research pipeline that produced peer-reviewed publications using Claude Code as the primary research assistant. This is the generalized setup pattern — stripped of domain-specific content and ready for any field.
+Born from a real PhD research pipeline that produced peer-reviewed publications using Claude Code as the primary research assistant. This is the generalized setup — stripped of domain-specific content and ready for any field.
 
 ## Contributing
 
-Contributions welcome! Areas where help is needed:
+Contributions welcome:
 
-- **Domain templates** — Pre-configured CLAUDE.md sections for specific fields (biology, physics, CS, etc.)
-- **Venue presets** — Quality checklists for specific journals (Nature, Science, IEEE, etc.)
-- **Workflow recipes** — Step-by-step guides for common research tasks
-- **Integration guides** — How to combine with other tools (Zotero, Overleaf, etc.)
+- **Domain templates** — Pre-configured sections for biology, physics, CS, etc.
+- **Venue presets** — Quality checklists for Nature, Science, IEEE, etc.
+- **Workflow recipes** — Guides for common research tasks
+- **Integration guides** — Zotero, Overleaf, OSF, etc.
 
 ## License
 
